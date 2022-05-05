@@ -1,6 +1,29 @@
 $(document).ready(function () {
   const postList = $("#postList");
 
+  $(document).on("click", "#goBackButton", function () {
+    $("#home-dark").show();
+    $("#detail-content").hide();
+  });
+
+  $(document).on("click", ".open-detail", function () {
+    $("#home-dark").hide();
+    $("#detail-content").show();
+
+
+    let buttonValue = $(this).find("button").val()
+    console.log(buttonValue);
+    getPostID(buttonValue)
+    
+
+  });
+
+
+
+
+  
+
+
   //GET REQUESTI UCUN
   const renderPosts = (arr) => {
     postList.html(
@@ -8,7 +31,7 @@ $(document).ready(function () {
         .reverse()
         .map(
           (post) => `
-                <div class="card m-4 w-100 position-relative">
+                <div class="card open-detail m-4 w-100 position-relative">
                     <img
                     src="https://cdn.dribbble.com/users/713533/screenshots/14158095/media/ae32d01dfc221a34aa5f3a2060a1e028.png?compress=1&resize=400x300"
                     class="card-img-top"
@@ -33,6 +56,8 @@ $(document).ready(function () {
     );
   };
 
+
+  //API's
   const getPosts = () => {
     $("#postDesc").val("");
 
@@ -53,6 +78,22 @@ $(document).ready(function () {
     });
   };
 
+  const getPostID = (id) => {
+    $("#postDesc").val("");
+
+    $.ajax({
+      url: `https://bloggy-api.herokuapp.com/posts/${id}`,
+      method: "GET",
+   
+    }).then((res) => {
+      console.log("getPostID", res);
+
+      $(".userTitle").html(res.title)
+      $(".userDesc").html(res.body)
+
+    });
+  };
+
   const createPost = (postData) => {
     $.ajax({
       url: "https://bloggy-api.herokuapp.com/posts",
@@ -69,6 +110,21 @@ $(document).ready(function () {
       });
   };
 
+  const deletePost = (id) => {
+    $.ajax({
+      url: `https://bloggy-api.herokuapp.com/posts/${id}`,
+      method: "DELETE",
+    })
+      .then(() => {
+        alert("Post ugurla silindi");
+        getPosts();
+      })
+      .catch((err) => {
+        alert("Yeniden cehd edin!");
+      });
+  };
+
+  //EVENTS
   $("#addPostBtn").on("click", function () {
     let title = $("#postTitle").val();
     let body = $("#postDesc").val().trim();
@@ -82,7 +138,6 @@ $(document).ready(function () {
     createPost(createPostData);
   });
 
-  //Delete ucun
   $(document).on("click", ".delete-button", function () {
     let buttonValue = $(this).val();
 
@@ -98,19 +153,6 @@ $(document).ready(function () {
     }
   });
 
-  const deletePost = (id) => {
-    $.ajax({
-      url: `https://bloggy-api.herokuapp.com/posts/${id}`,
-      method: "DELETE",
-    })
-      .then(() => {
-        alert("Post ugurla silindi");
-        getPosts();
-      })
-      .catch((err) => {
-        alert("Yeniden cehd edin!");
-      });
-  };
 
   getPosts();
 });
